@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateAccSensorDTO } from 'src/mongodb/dto/create-acc-sensor.dto';
 import { AccSensor } from 'src/mongodb/interfaces/acc-sensor.interface';
 
@@ -25,7 +25,8 @@ export class AccSensorService {
 
     async getAccSensorDataForDevice(deviceId): Promise<AccSensor[]> {
         const accSensorData = await this.getAccSensorData()
-        return accSensorData.filter(d => d.device === deviceId);
+        const testObjStr = new Types.ObjectId(deviceId).toString();
+        return accSensorData.filter(d => testObjStr === deviceId.toString());
     }
 
     async deleteAccSensorData(accSenosrId): Promise<AccSensor> {

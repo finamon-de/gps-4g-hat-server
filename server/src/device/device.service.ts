@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateDeviceDTO } from 'src/mongodb/dto/create-device.dto';
 import { Device } from 'src/mongodb/interfaces/device.interface';
 
@@ -30,7 +30,8 @@ export class DeviceService {
 
     async getDevicesForUser(userId): Promise<Device[]> {
         const devices = await this.deviceModel.find().exec();
-        return devices.filter(d => d.owner === userId);
+        const testObjStr = new Types.ObjectId(userId).toString();
+        return devices.filter(d =>  testObjStr === d.owner.toString());
     }
 
     async getDeviceByImei(imei): Promise<Device> {
@@ -49,7 +50,6 @@ export class DeviceService {
             if (!keepReferences) {
                 updatedDevice = await this.deviceModel.findOneAndUpdate({imei}, createDeviceDto, { new: true }).exec();
             } else {
-                console.info("Keep references");
                 const objToUpdate =  {
                     imei: createDeviceDto.imei,
                     ip: createDeviceDto.ip,
@@ -59,7 +59,6 @@ export class DeviceService {
                     button: createDeviceDto.button,
                     last_contact: new Date().toISOString()
                 };
-                console.log(objToUpdate);
                 updatedDevice = await this.deviceModel.findOneAndUpdate({imei},{...objToUpdate}, {new: true}).exec();
             }
         } catch(e) {

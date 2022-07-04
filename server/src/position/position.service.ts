@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreatePositionDTO } from 'src/mongodb/dto/create-position.dto';
 import { Position } from 'src/mongodb/interfaces/position.interface';
 
@@ -25,7 +25,8 @@ export class PositionService {
 
     async getPositionsForDevice(deviceId): Promise<Position[]> {
         const positions = await this.positionModel.find().exec();
-        return positions.filter(p => p.device === deviceId);
+        const testObjStr = new Types.ObjectId(deviceId).toString();
+        return positions.filter(p => testObjStr === deviceId.toString());
     }
 
     async deletePosition(positionId): Promise<any> {
