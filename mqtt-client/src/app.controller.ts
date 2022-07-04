@@ -6,7 +6,7 @@ export class AppController {
   constructor(@Inject('MQTT_SERVICE') private client: ClientProxy) {}
 
   @Get("device")
-  async getPositions() {
+  async getDevice() {
     const deviceStatus = {
       imei: "0123456789",
       ip: "128.0.0.1",
@@ -16,5 +16,16 @@ export class AppController {
       button: 0,
     }
     return this.client.send("device/status", JSON.stringify(deviceStatus))
+  }
+
+  @Get("position")
+  async getPosition() {
+    const deviceStatus = {
+      imei: 866349041737515,
+      latitude: 0.0,
+      longitude: 0.0,
+      utc: new Date().getTime()
+    }
+    return this.client.send("gps/coordinates", JSON.stringify(deviceStatus))
   }
 }

@@ -16,8 +16,12 @@ export class MqttController {
     @MessagePattern("device/status")
     async getDeviceStatus(@Payload() data) {
         try {
-            const obj = JSON.parse(data)
-            const updatedRecord = await this.deviceService.updateDeviceByImei(obj.imei, obj);
+            if (!data.hasOwnProperty('imei')) {
+                console.log("No imei");
+                return "error";
+            }
+
+            const updatedRecord = await this.deviceService.updateDeviceByImei(data.imei, data);
             return !updatedRecord ? "error" : "success"
         } catch(e) {
             console.log(e)
@@ -28,18 +32,21 @@ export class MqttController {
     @MessagePattern("gps/coordinates")
     async getCoordinate(@Payload() data) {
         try {
-            const obj = JSON.parse(data)
+            if (!data.hasOwnProperty('imei')) {
+                console.log("No imei");
+                return "error";
+            }
             
-            const device = await this.deviceService.getDeviceByImei(obj.imei);
+            const device = await this.deviceService.getDeviceByImei(data.imei);
             if (!device) {
-                throw new NotFoundException(`Device with imei ${obj.imei} does not exist`)
+                throw new NotFoundException(`Device with imei ${data.imei} does not exist`)
             }
 
             const objToAdd = {
-                latitude: obj.latitude,
-                longitude: obj.longitude,
-                altitude: obj.utc ?? null,
-                utc: obj.utc,
+                latitude: data.latitude,
+                longitude: data.longitude,
+                altitude: data.altitude ?? 0.0,
+                utc: data.utc,
                 device: device._id
             }
 
@@ -54,19 +61,22 @@ export class MqttController {
     @MessagePattern("sensors/acceleration")
     async getAccelartionSensorData(@Payload() data) {
         try {
-            const obj = JSON.parse(data)
+            if (!data.hasOwnProperty('imei')) {
+                console.log("No imei");
+                return "error";
+            }
 
-            const device = await this.deviceService.getDeviceByImei(obj.imei);
+            const device = await this.deviceService.getDeviceByImei(data.imei);
             if (!device) {
-                throw new NotFoundException(`Device with imei ${obj.imei} does not exist`)
+                throw new NotFoundException(`Device with imei ${data.imei} does not exist`)
             }
 
             const objToAdd = {
-                x: obj.x,
-                y: obj.y,
-                z: obj.z,
-                status: obj.status,
-                utc: obj.utc,
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                status: data.status,
+                utc: data.utc,
                 device: device._id
             }
 
