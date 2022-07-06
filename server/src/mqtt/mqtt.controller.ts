@@ -51,6 +51,15 @@ export class MqttController {
             }
 
             const addedRecord = await this.positionService.addPosition(objToAdd);
+
+            if (addedRecord && !Array.isArray(device.positions)) {
+                device.positions = [addedRecord._id]
+            } else if (addedRecord) {
+                device.positions.push(addedRecord._id)
+            }
+
+            this.deviceService.updateDevice(device);
+
             return !addedRecord ? "error" : "success"
         } catch(e) {
             console.log(e)
@@ -80,8 +89,17 @@ export class MqttController {
                 device: device._id
             }
 
-            const updatedRecord = await this.accSensorService.addAccSensorData(objToAdd);
-            return !updatedRecord ? "error" : "success"
+            const addedRecord = await this.accSensorService.addAccSensorData(objToAdd);
+
+            if (addedRecord && !Array.isArray(device.positions)) {
+                device.positions = [addedRecord._id]
+            } else if (addedRecord) {
+                device.positions.push(addedRecord._id)
+            }
+
+            this.deviceService.updateDevice(device);
+
+            return !addedRecord ? "error" : "success"
         } catch(e) {
             console.log(e)
             return "Could not parse payload. Is it a valid JSON string?"

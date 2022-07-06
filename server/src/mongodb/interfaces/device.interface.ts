@@ -8,7 +8,7 @@ export interface Device extends Document {
     readonly led: number,
     readonly button: number,
     readonly last_contact: string,
-    readonly owner: Schema.Types.ObjectId | Record<string, unknown>,
-    readonly positions: Schema.Types.ObjectId | Record<string, unknown>,
-    readonly acc_sensor_data: Schema.Types.ObjectId | Record<string, unknown>
+    owner: Schema.Types.ObjectId | Record<string, unknown>,
+    positions: Array<Schema.Types.ObjectId> | Array<Record<string, unknown>>,
+    acc_sensor_data: Array<Schema.Types.ObjectId> | Array<Record<string, unknown>>
 }

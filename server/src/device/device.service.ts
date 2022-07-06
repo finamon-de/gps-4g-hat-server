@@ -44,6 +44,11 @@ export class DeviceService {
         return editedDevice;
     }
 
+    async updateDevice(device: Device): Promise<Device> {
+        const updatedDevice = await this.deviceModel.findOneAndUpdate({_id: device._id}, device, {new: true}).exec();
+        return updatedDevice;
+    }
+
     async updateDeviceByImei(imei, createDeviceDto: CreateDeviceDTO, keepReferences: Boolean = true): Promise<Device> {
         let updatedDevice;
         try {
