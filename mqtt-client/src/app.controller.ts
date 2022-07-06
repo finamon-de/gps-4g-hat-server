@@ -15,7 +15,7 @@ export class AppController {
       led: 0,
       button: 0,
     }
-    return this.client.send("device/status", JSON.stringify(deviceStatus))
+    return this.client.send("device/status", deviceStatus)
   }
 
   @Get("position")
@@ -26,6 +26,6 @@ export class AppController {
       longitude: 0.0,
       utc: new Date().getTime()
     }
-    return this.client.send("gps/coordinates", JSON.stringify(deviceStatus))
+    return this.client.send("gps/coordinates", deviceStatus)
   }
 }
