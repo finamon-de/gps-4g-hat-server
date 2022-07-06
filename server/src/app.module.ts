@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 // mongoose
 import { MongooseModule } from "@nestjs/mongoose";
+
+// custom
 import { UserModule } from './user/user.module';
 import { UserService } from './user/user.service';
 import { DeviceService } from './device/device.service';
@@ -22,7 +25,11 @@ const mongooseConnectionUrl = 'mongodb://localhost/test-database'
     UserModule,
     DeviceModule,
     PositionModule,
-    AccSensorModule
+    AccSensorModule,
+    ConfigModule.forRoot({
+      envFilePath: [ ".local.env", ".sample.env" ],
+      isGlobal: true
+    })
   ],
   controllers: [AppController, UserController, DeviceController, MqttController],
   providers: [AppService, UserService, DeviceService],
