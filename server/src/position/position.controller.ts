@@ -67,6 +67,25 @@ export class PositionController {
         summary: 'Remove a position.',
         description: 'Remove a position.'
     })
+    @ApiQuery({ name: "deviceId", type: "string" })
+    @ApiOkResponse({ description: "Success message" })
+    @ApiNotFoundResponse({ description: "Position was not found or does not exist." })
+    @Get("/latest")
+    async getLatestPositionsForDevice(
+        @Res() res,
+        @Query("deviceId", new ValidateObjectId()) deviceId
+    ) {
+        const position = await this.positionService.getLatestPositionsForDevice(deviceId);
+        if(!position) {
+            throw new NotFoundException("Position does not exist");
+        }
+        return res.status(HttpStatus.OK).json(position);
+    }
+
+    @ApiOperation({
+        summary: 'Remove a position.',
+        description: 'Remove a position.'
+    })
     @ApiParam({ name: "positionId", type: "string" })
     @ApiOkResponse({ description: "Success message" })
     @ApiNotFoundResponse({ description: "Position was not found or does not exist." })

@@ -6,7 +6,7 @@ import { Position } from 'src/mongodb/interfaces/position.interface';
 
 @Injectable()
 export class PositionService {
-    constructor(@InjectModel("Position") private readonly positionModel: Model<Position>) {}
+    constructor(@InjectModel("Position") private readonly positionModel: Model<Position>) { }
 
     async addPosition(createPositionDto: CreatePositionDTO): Promise<Position> {
         const newPosition = new this.positionModel(createPositionDto);
@@ -27,6 +27,11 @@ export class PositionService {
         const positions = await this.positionModel.find().exec();
         const testObjStr = new Types.ObjectId(deviceId).toString();
         return positions.filter(p => testObjStr === deviceId.toString());
+    }
+
+    async getLatestPositionsForDevice(deviceId): Promise<Position> {
+        const position = await this.positionModel.findOne({device: new Types.ObjectId(deviceId)}, {}, {sort:{utc: -1}})
+        return position
     }
 
     async deletePosition(positionId): Promise<any> {

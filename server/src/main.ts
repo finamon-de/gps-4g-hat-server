@@ -6,6 +6,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   // API
   const apiApp = await NestFactory.create(AppModule);
+  apiApp.enableCors({ 
+    origin: '*',
+    optionsSuccessStatus: 204 
+  })
 
   const config = new DocumentBuilder()
     .setTitle('GPS 4G HAT API')

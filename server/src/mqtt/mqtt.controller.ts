@@ -1,13 +1,15 @@
-import { Controller, NotFoundException } from '@nestjs/common';
+import { Controller, Inject, NotFoundException } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AccSensorService } from 'src/acc-sensor/acc-sensor.service';
 import { DeviceService } from 'src/device/device.service';
 import { PositionService } from 'src/position/position.service';
+import { WebSocketClient } from 'src/websockets/client';
 
 @Controller('mqtt')
 export class MqttController {
 
     constructor(
+        private webSocket: WebSocketClient,
         private deviceService: DeviceService,
         private positionService: PositionService,
         private accSensorService: AccSensorService
@@ -59,6 +61,10 @@ export class MqttController {
             }
 
             this.deviceService.updateDevice(device);
+
+            if (addedRecord) {
+                this.webSocket.socket.emit("positions", addedRecord);
+            }
 
             return !addedRecord ? "error" : "success"
         } catch(e) {

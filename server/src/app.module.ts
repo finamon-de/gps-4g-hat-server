@@ -16,6 +16,8 @@ import { DeviceModule } from './device/device.module';
 import { MqttController } from './mqtt/mqtt.controller';
 import { PositionModule } from './position/position.module';
 import { AccSensorModule } from './acc-sensor/acc-sensor.module';
+import { WebSocketModule } from './websockets/websockets.module';
+import { WebSocketClient } from './websockets/client';
 
 const mongooseConnectionUrl = 'mongodb://localhost/test-database'
 
@@ -29,9 +31,10 @@ const mongooseConnectionUrl = 'mongodb://localhost/test-database'
     ConfigModule.forRoot({
       envFilePath: [ ".local.env", ".sample.env" ],
       isGlobal: true
-    })
+    }),
+    WebSocketModule
   ],
   controllers: [AppController, UserController, DeviceController, MqttController],
-  providers: [AppService, UserService, DeviceService],
+  providers: [AppService, UserService, DeviceService, WebSocketClient],
 })
 export class AppModule {}
