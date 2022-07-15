@@ -39,7 +39,6 @@ export const BaseLayout = () => {
     const polylinesRef = useRef([])
 
     const newPositionCallback = (data) => {
-        console.log(data);
         let copy = [...markerData]
         const index = copy.findIndex(d => d.device === data.device)
         if (index >= 0) {
