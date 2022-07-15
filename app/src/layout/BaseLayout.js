@@ -101,13 +101,31 @@ export const BaseLayout = () => {
                     },
                 })
             })
+            map.current.on('click', 'polyline-markers', (e) => {
+                const coordinates = e.features[0].geometry.coordinates.slice();
+                const lat = coordinates[1]
+                const lng = coordinates[0]
+                const utc = e.features[0].properties.utc ?? 0
+                const timestamp = new Date(utc).toISOString()
+
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+
+                new mapboxgl.Popup({anchor: 'bottom' })
+                    .setLngLat(coordinates)
+                    .setHTML(
+                        `<span style="font-family: monospace">Lat: ${lat}<br>Lng: ${lng}<br/>Time: ${timestamp}</span>`
+                    )
+                    .addTo(map.current);
+            })
     }, [])
 
     useEffect(() => {
         if (!mapContainer.current) return
 
         const newMarkers = markerData.map((item, index) => {
-            return new mapboxgl.Marker().setLngLat(item.longitude, item.latitude).addTo(map)
+            return new mapboxgl.Marker().setLngLat([item.longitude, item.latitude]).addTo(map.current)
         })
 
         setMarkers(newMarkers)
@@ -227,17 +245,18 @@ export const BaseLayout = () => {
     const buildCircleFeatures = (segments) => {
         const features = []
         segments.forEach((item, index) => {
-            const coordinates = item.filter(el => el.longitude !== undefined && el.latitude !== undefined).map(el => { return [ el.longitude, el.latitude ] }) ?? []
+            const coordinates = item.filter(el => el.longitude !== undefined && el.latitude !== undefined).map(el => { return el }) ?? []
             const color = generateRandomColor()
             coordinates.forEach(c => {
                 features.push({
                     type: 'Feature',
                     properties: {
-                        color: color
+                        color: color,
+                        utc: c.utc ?? 0
                     },
                     geometry: {
                         type: 'Point',
-                        coordinates: c
+                        coordinates: [ c.longitude, c.latitude ]
                     }
                 })
             })
