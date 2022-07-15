@@ -26,7 +26,7 @@ export class AccSensorService {
     async getAccSensorDataForDevice(deviceId): Promise<AccSensor[]> {
         const accSensorData = await this.getAccSensorData()
         const testObjStr = new Types.ObjectId(deviceId).toString();
-        return accSensorData.filter(d => testObjStr === deviceId.toString());
+        return accSensorData.filter(d => testObjStr === d.device.toString());
     }
 
     async deleteAccSensorData(accSenosrId): Promise<AccSensor> {

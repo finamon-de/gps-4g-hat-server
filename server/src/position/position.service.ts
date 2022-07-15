@@ -26,7 +26,7 @@ export class PositionService {
     async getPositionsForDevice(deviceId): Promise<Position[]> {
         const positions = await this.positionModel.find().exec();
         const testObjStr = new Types.ObjectId(deviceId).toString();
-        return positions.filter(p => testObjStr === deviceId.toString());
+        return positions.filter(p => testObjStr === p.device.toString());
     }
 
     async getLatestPositionsForDevice(deviceId): Promise<Position> {
