@@ -1,15 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { AppModule } from './app.module';
+import { AppModule } from './app/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   // API
   const apiApp = await NestFactory.create(AppModule);
-  apiApp.enableCors({ 
+  apiApp.enableCors({
     origin: '*',
-    optionsSuccessStatus: 204 
-  })
+    optionsSuccessStatus: 204,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('GPS 4G HAT API')
@@ -22,16 +22,21 @@ async function bootstrap() {
   await apiApp.listen(process.env.API_PORT);
 
   // MQTT
-  const mqttApp = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
-    transport: Transport.MQTT,
-    options: {
-      url: process.env.MQTT_CONNECTION_URL,
+  const mqttApp = await NestFactory.createMicroservice<MicroserviceOptions>(
+    AppModule,
+    {
+      transport: Transport.MQTT,
+      options: {
+        url: process.env.MQTT_CONNECTION_URL,
 
-      // uncomment if necessary
-      // username: process.env.MQTT_USERNAME,
-      // password: process.env.MQTT_PASSWORD
-    }
-  });
+        // uncomment if necessary
+        // username: process.env.MQTT_USERNAME,
+        // password: process.env.MQTT_PASSWORD
+      },
+    },
+  );
   await mqttApp.listen();
 }
-bootstrap();
+bootstrap().then(() => {
+  /*do nothing*/
+});
