@@ -1,52 +1,28 @@
-import React, { useCallback, useEffect, useState, useRef } from "react"
-import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
-import { Layout, List, Input, Button, Card, Grid, Row, Col, Tabs, Tooltip, Table } from 'antd';
-import { MenuFoldOutlined, MenuUnfoldOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons'
+import React, { useEffect, useState } from "react"
+import { Layout, Input, Button, Row, Col } from 'antd';
 import { DeviceApi } from "../api/device.api";
 import { ApiSocket } from "../api/api.socket";
+import { DevicesPanel } from "./components/DevicesPanel";
+import { MapboxMap } from "./components/MapboxMap";
 
-mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN
-
-const { Header, Content, Sider } = Layout
-
-const mapContainer = {
-    width: '100%',
-    height: 'calc(100vh - 64px)'
-}
+const { Header, Content } = Layout
 
 const apiSocket = ApiSocket()
 
 export const BaseLayout = () => {
 
-    
-    const [ input, setInput ] = useState("")
+    const [ input, setInput ] = useState("62bf08378d0a8a16201ef153")
     const [ devicesToWatch, setDevicesToWatch ] = useState([])
-    const mapContainer = useRef(null);
-    const map = useRef(null);
-    const [zoom, setZoom] = useState(9);
-    const [ center, setCenter ] = useState({ lat:51.2291589, lng: 6.7160651 })
-    const [ markerData, setMarkerData ] = useState([])
-    const [ markers, setMarkers ] = useState([])
-
-    const [ polylineSource, setPolylineSource ] = useState()
-    const [ circleSource, setCircleSource ] = useState()
 
     const [ listItemsDevices, setListItemsDevices ] = useState([])
     const [ listItemsPosition, setListItemsPosition ] = useState([])
-
-    const [ pathOptions, setPathOptions ] = useState([])
-    const [ polylines, setPolylines ] = useState([])
-    const polylinesRef = useRef([])
+    const [ listItemsLivePosition, setListItemsLivePosition ] = useState([])
+    const [ lastPositionFromCallback, setLastPositionFromCallback ] = useState(null)
+    const [ markerData, setMarkerData ] = useState([])
+    const [ segments, setSegments ] = useState([])
 
     const newPositionCallback = (data) => {
-        let copy = [...markerData]
-        const index = copy.findIndex(d => d.device === data.device)
-        if (index >= 0) {
-            copy.splice(index, 1, data)
-        } else {
-            copy.push(data)
-        }
-        setMarkerData(copy)
+        setLastPositionFromCallback(data)
     }
 
     useEffect(() => {
@@ -57,105 +33,47 @@ export const BaseLayout = () => {
         }
 
         initSocket()
-
-
-        if (map.current) return; // initialize map only once
-            map.current = new mapboxgl.Map({
-                container: mapContainer.current,
-                style: 'mapbox://styles/mapbox/streets-v11',
-                center: [center.lng, center.lat],
-                zoom: zoom
-            });
-            map.current.on('load', () => {
-                map.current.addSource('polylines', {
-                    type: 'geojson',
-                    data: {
-                        type: 'FeatureCollection',
-                        features: []
-                    }
-                })
-                map.current.addLayer({
-                    id: 'polylines',
-                    type: 'line',
-                    source: 'polylines',
-                    paint: {
-                        "line-width": 3,
-                        "line-color": [ "get", "color" ]
-                    }
-                })
-                map.current.addSource('polyline-markers', {
-                    type: 'geojson',
-                    data: {
-                        type: 'FeatureCollection',
-                        features: []
-                    }
-                })
-                map.current.addLayer({
-                    id: 'polyline-markers',
-                    type: 'circle',
-                    source: 'polyline-markers',
-                    paint: {
-                        "circle-radius": 5,
-                        "circle-color": [ "get", "color" ]
-                    },
-                })
-            })
-            map.current.on('click', 'polyline-markers', (e) => {
-                const coordinates = e.features[0].geometry.coordinates.slice();
-                const lat = coordinates[1]
-                const lng = coordinates[0]
-                const utc = e.features[0].properties.utc ?? 0
-                const timestamp = new Date(utc).toISOString()
-
-                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-                }
-
-                new mapboxgl.Popup({anchor: 'bottom' })
-                    .setLngLat(coordinates)
-                    .setHTML(
-                        `<span style="font-family: monospace">Lat: ${lat}<br>Lng: ${lng}<br/>Time: ${timestamp}</span>`
-                    )
-                    .addTo(map.current);
-            })
     }, [])
 
     useEffect(() => {
-        if (!mapContainer.current) return
+         const updateMarkerData = (data) => {
+            // only updated if watched
+            if (!devicesToWatch.includes(data.device)) return
 
-        const newMarkers = markerData.map((item, index) => {
-            return new mapboxgl.Marker().setLngLat([item.longitude, item.latitude]).addTo(map.current)
-        })
+            let copy = [...markerData]
+            const index = copy.findIndex(d => d.device === data.device)
+            if (index >= 0) {
+                copy.splice(index, 1, data)
+            } else {
+                copy.push(data)
+            }
+            setMarkerData(copy)
+        }
+       
+        const updateLivePositions = (data) => {
+            const copy = [...listItemsLivePosition]
+            const index = copy.findIndex(el => el.deviceId === data.device)
+            
+            // replace position data or set new
+            if (index >= 0) {
+                copy[index].positions.push(data)
+            } else {
+                const d = listItemsDevices.filter(element => element._id === data.device)
+                const imei = d && d.length > 0 ? d[0].imei : 'IMEI unknown'
+                copy.push({
+                    imei: imei,
+                    deviceId: data.device,
+                    positions: [data]
+                })
+            }
+            setListItemsLivePosition(copy)
+        }
 
-        setMarkers(newMarkers)
-
-    }, [markerData])
-
-    useEffect(() => {
-        if (!map.current) return
-        if (!map.current.getSource('polylines')) return
-        if (!polylineSource) return
-
-        const geojsonSource = map.current.getSource('polylines')
-        geojsonSource.setData({
-            type: 'FeatureCollection',
-            features: polylineSource
-        })
-        
-    }, [polylineSource])
-    
-    useEffect(() => {
-        if (!map.current) return
-        if (!map.current.getSource('polyline-markers')) return
-        if (!circleSource) return
-
-        const geojsonSource = map.current.getSource('polyline-markers')
-        geojsonSource.setData({
-            type: 'FeatureCollection',
-            features: circleSource
-        })
-        
-    }, [circleSource])
+        if(lastPositionFromCallback) {
+            updateMarkerData(lastPositionFromCallback)
+            updateLivePositions(lastPositionFromCallback)
+        }
+    }, [lastPositionFromCallback])
 
     const onInputChange = (event) => {
         setInput(event.target.value)
@@ -171,6 +89,8 @@ export const BaseLayout = () => {
 
         const copy = [...listItemsPosition]
         const index = copy.findIndex(el => el.deviceId === item._id)
+        
+        // replace position data or set new
         if (index >= 0) {
             copy[index].positions = positions.data
         } else {
@@ -198,8 +118,7 @@ export const BaseLayout = () => {
     }
 
     const onClickClearPositions = () => {
-        setPolylineSource([])
-        setCircleSource([])
+        setSegments([])
     }
 
     const onClickShowPositions = async (device) => {
@@ -214,64 +133,7 @@ export const BaseLayout = () => {
             segments = buildSegments(entry.positions)
         }
 
-        const lineStringFeatures = buildLineStringFeatures(segments)
-        setPolylineSource(lineStringFeatures)
-
-        const circleFeatures = buildCircleFeatures(segments)
-        setCircleSource(circleFeatures)
-    }
-
-    const buildLineStringFeatures = (segments) => {
-        const features = []
-        segments.forEach((item, index) => {
-            const coordinates = item.filter(el => el.longitude !== undefined && el.latitude !== undefined).map(el => { return [ el.longitude, el.latitude ] }) ?? []
-            const color = generateRandomColor()
-            features.push({
-                type: 'Feature',
-                properties: {
-                    color: color
-                },
-                geometry: {
-                    type: 'LineString',
-                    coordinates: coordinates
-                }
-            })
-        });
-
-        return features
-    
-    }
-    const buildCircleFeatures = (segments) => {
-        const features = []
-        segments.forEach((item, index) => {
-            const coordinates = item.filter(el => el.longitude !== undefined && el.latitude !== undefined).map(el => { return el }) ?? []
-            const color = generateRandomColor()
-            coordinates.forEach(c => {
-                features.push({
-                    type: 'Feature',
-                    properties: {
-                        color: color,
-                        utc: c.utc ?? 0
-                    },
-                    geometry: {
-                        type: 'Point',
-                        coordinates: [ c.longitude, c.latitude ]
-                    }
-                })
-            })
-            
-        });
-
-        return features
-    }
-
-    const generateRandomColor = () => {
-        let maxVal = 0xFFFFFF; // 16777215
-        let randomNumber = Math.random() * maxVal; 
-        randomNumber = Math.floor(randomNumber);
-        randomNumber = randomNumber.toString(16);
-        let randColor = randomNumber.padStart(6, 0);   
-        return `#${randColor.toUpperCase()}`
+        setSegments(segments)
     }
 
     const buildSegments = (positions) => {
@@ -303,82 +165,6 @@ export const BaseLayout = () => {
         });
         return segments
     }
-
-    const onMarkerLoaded = (marker) => {
-        
-    }
-
-    const onTabChanged = (key) => {
-
-    }
-
-    const renderTab = (device, index) => (
-        <Tabs.TabPane tab={device.imei ?? 'Undefined IMEI'} key={index}>
-            { renderTabContent(device, index) }
-        </Tabs.TabPane>
-    )
-
-    const renderTabContent = (device, index) => {
-        const entries = listItemsPosition.filter(item => item.deviceId === device._id)
-        const positions = entries.length > 0 ? entries[0].positions : []  // should only contain one element
-        return (
-            <div key={'tab-content-'+index} style={{padding: 8}}>
-                <Row gutter={16}>
-                    <Col>
-                        <Tooltip title={ devicesToWatch.includes(device._id) ? 'Unwatch' : 'Watch'}>
-                            <Button 
-                                shape={'circle'}
-                                icon={ devicesToWatch.includes(device._id) 
-                                    ? <EyeInvisibleOutlined key={'unwatch'} style={{color: '#ff0000'}} onClick={() => onClickWatchDevice(device)} /> 
-                                    : <EyeOutlined key={'watch'} style={{color: '#1da57a'}} onClick={() => onClickWatchDevice(device)} /> }
-                            />
-                        </Tooltip>
-                    </Col>
-                    <Col>
-                        <Button onClick={() => onClickLoadPositions(device)} type={'primary'}>Load Positions</Button>
-                    </Col>
-                    <Col>
-                        <Button onClick={() => onClickShowPositions(device)} type={'primary'}>Show Path</Button>
-                    </Col>
-                    <Col>
-                        <Button onClick={() => onClickClearPositions()} type={'default'}>Clear Path</Button>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col xs={24} style={{paddingTop: 32}}>
-                        { renderPositionTable(positions) }
-                    </Col>
-                </Row>
-            </div>
-        )
-    }
-
-    const renderPositionTable = (positions) => {
-        const columns = [
-            {
-                title: 'Timestamp',
-                dataIndex: 'utc',
-                key: 'utc',
-                render: (text) => <div><span style={{fontFamily: 'monospace'}}>{text}</span><br /><span style={{fontFamily: 'monospace'}}>{new Date(text).toISOString()}</span></div>
-            },
-            {
-                title: 'Latitude',
-                dataIndex: 'latitude',
-                key: 'latitude',
-                render: (text) => <span style={{fontFamily: 'monospace'}}>{text}</span>
-            },
-            {
-                title: 'Longitude',
-                dataIndex: 'longitude',
-                key: 'longitude',
-                render: (text) => <span style={{fontFamily: 'monospace'}}>{text}</span>
-            },
-        ]
-
-
-        return (<Table size={'small'} dataSource={positions} columns={columns} rowKey={'_id'} />)
-    }
-
     
     return (
         <Layout>
@@ -391,14 +177,20 @@ export const BaseLayout = () => {
             <Content style={{ minHeight: 'calc(100vh - 64px)' }}>
                 <Row>
                     <Col sm={24} md={12}>
-                        <div ref={mapContainer} className="map-container" style={{width: '100%', height: 'calc(100vh - 64px)'}} />
+                        <MapboxMap markerData={markerData} segments={segments} />
                     </Col>
                     <Col sm={24} md={12} style={{background: '#ffffff'}}>
                         {
                             listItemsDevices.length > 0 ? (
-                                <Tabs defaultActiveKey="0" onChange={onTabChanged} type={'card'}>
-                                    { listItemsDevices.map((item, index) => { return renderTab(item, index) })}
-                                </Tabs>
+                                <DevicesPanel 
+                                    devices={listItemsDevices} 
+                                    positions={listItemsPosition}
+                                    livePositions={listItemsLivePosition}
+                                    watched={devicesToWatch}
+                                    onClickLoadPositions={onClickLoadPositions}
+                                    onClickShowPositions={onClickShowPositions}
+                                    onClickClearPositions={onClickClearPositions}
+                                    onClickWatchDevice={onClickWatchDevice} />
                             ) : (
                                 <p>Enter a User ID an press 'Load'.</p>
                             )
