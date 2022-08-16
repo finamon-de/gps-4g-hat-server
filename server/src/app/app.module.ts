@@ -18,21 +18,23 @@ import { PositionModule } from '../position/position.module';
 import { AccSensorModule } from '../sensors/acc-sensor/acc-sensor.module';
 import { WebSocketModule } from '../communication/websockets/websockets.module';
 import { WebSocketClient } from '../communication/websockets/client';
-
-const mongooseConnectionUrl = 'mongodb://localhost/test-database';
+import { MqttModule } from '../communication/mqtt/mqtt.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(mongooseConnectionUrl, { useNewUrlParser: true }),
-    UserModule,
-    DeviceModule,
-    PositionModule,
-    AccSensorModule,
     ConfigModule.forRoot({
       envFilePath: ['.local.env', '.sample.env'],
       isGlobal: true,
     }),
+    MongooseModule.forRoot(process.env.MONGODB_CONNECTION_URL, {
+      useNewUrlParser: true,
+    }),
+    UserModule,
+    DeviceModule,
+    PositionModule,
+    AccSensorModule,
     WebSocketModule,
+    MqttModule,
   ],
   controllers: [
     AppController,

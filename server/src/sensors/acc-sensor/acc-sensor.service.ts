@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateAccSensorDTO } from 'src/database/mongodb/dto/create-acc-sensor.dto';
-import { AccSensor } from 'src/interfaces/acc-sensor.interface';
+import { AccSensor } from 'src/database/mongodb/interfaces/acc-sensor.interface';
 
 @Injectable()
 export class AccSensorService {

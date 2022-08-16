@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreatePositionDTO } from 'src/database/mongodb/dto/create-position.dto';
-import { Position } from 'src/interfaces/position.interface';
+import { Position } from 'src/database/mongodb/interfaces/position.interface';
 
 @Injectable()
 export class PositionService {
