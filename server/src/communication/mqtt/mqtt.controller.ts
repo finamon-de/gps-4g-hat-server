@@ -14,6 +14,8 @@ import { Device } from '../../database/mongodb/interfaces/device.interface';
 
 @Controller('mqtt')
 export class MqttController {
+  private responseTopicPrefix = 'receive/';
+
   constructor(
     @Inject('MQTT_CLIENT') private mqttClient: ClientProxy,
     private webSocket: WebSocketClient,
@@ -127,9 +129,9 @@ export class MqttController {
       );
 
       if (addedRecord && !Array.isArray(device.positions)) {
-        device.positions = [addedRecord._id];
+        device.acc_sensor_data = [addedRecord._id];
       } else if (addedRecord) {
-        device.positions.push(addedRecord._id);
+        device.acc_sensor_data.push(addedRecord._id);
       }
 
       await this.deviceService.updateDevice(device);
@@ -173,13 +175,24 @@ export class MqttController {
     };
   }
 
-  createResponse(data: any) {
+  createResponse(currentTopic: string, data: any) {
     return {
+      topic: currentTopic,
       response: data,
     };
   }
 
-  sendMqttResponse(topic: string, data: any) {
-    this.mqttClient.emit(topic, this.createResponse(data));
+  sendMqttResponse(currentTopic: string, data: any) {
+    const parts = currentTopic.split('/');
+    const imei = parts[parts.length - 1];
+    const responseTopic = `${this.responseTopicPrefix}${imei}`;
+    try {
+      this.mqttClient.emit(
+        responseTopic,
+        this.createResponse(currentTopic, data),
+      );
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
