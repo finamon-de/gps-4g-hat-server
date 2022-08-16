@@ -1,5 +1,4 @@
-import { getConfirmLocale } from "antd/lib/modal/locale"
-import { io } from "socket.io-client"
+import {io} from "socket.io-client"
 
 export const ApiSocket = () => {
 
@@ -44,15 +43,14 @@ export const ApiSocket = () => {
 
     const _removeNewPositionCallback = (fn) => {
         const copy = [...callbacks]
-        const spliced = copy.splice(copy.findIndex(fn), 1)
-        callbacks = spliced
+        callbacks = copy.splice(copy.findIndex(fn), 1)
     }
 
 
     return Object.freeze({
         connect: _connect,
-        addNewPositonCallback: _addNewPositionCallback,
-        removeNewPositonCallback: _removeNewPositionCallback
+        addNewPositionCallback: _addNewPositionCallback,
+        removeNewPositionCallback: _removeNewPositionCallback
     })
 
 }

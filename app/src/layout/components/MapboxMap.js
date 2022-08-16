@@ -12,7 +12,7 @@ export const MapboxMap = (props) => {
     const mapContainer = useRef(null);
     const map = useRef(null);
 
-    const [zoom, setZoom] = useState(9);
+    const [ zoom, setZoom ] = useState(9);
     const [ center, setCenter ] = useState({ lat:51.2291589, lng: 6.7160651 })
     const [ markers, setMarkers ] = useState([])
     

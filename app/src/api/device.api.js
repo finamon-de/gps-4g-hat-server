@@ -5,8 +5,7 @@ export const DeviceApi = () => {
 
     const _loadDevicesForUser = async (userId) => {
         try {
-            const response = await axios.get(`${baseUrl}/devices?userId=${userId}`)
-            return response
+            return await axios.get(`${baseUrl}/devices?userId=${userId}`)
         } catch(e) {
             console.error(e)
         }
@@ -15,8 +14,7 @@ export const DeviceApi = () => {
 
     const _loadPositionsForDevice = async (deviceId) => {
         try {
-            const response = await axios.get(`${baseUrl}/positions?deviceId=${deviceId}`)
-            return response
+            return await axios.get(`${baseUrl}/positions?deviceId=${deviceId}`)
         } catch(e) {
             console.error(e)
         }
@@ -25,8 +23,7 @@ export const DeviceApi = () => {
 
     const _loadLatestPositionForDevice = async (deviceId) => {
         try {
-            const response = await axios.get(`${baseUrl}/positions/latest?deviceId=${deviceId}`)
-            return response
+            return await axios.get(`${baseUrl}/positions/latest?deviceId=${deviceId}`)
         } catch(e) {
             console.error(e)
         }

@@ -10,8 +10,6 @@ const options = {
     timeZone: 'UTC'
 };
 
-
-
 export const DevicePositionTable = (props) => {
 
     const positions = props.positions ?? []
