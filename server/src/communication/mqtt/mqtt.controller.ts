@@ -28,9 +28,9 @@ export class MqttController {
 
     try {
       // check if the received message is our own response
-      if (data.hasOwnProperty('response')) return;
+      if (this.isResponse(data)) return;
 
-      if (!data.hasOwnProperty('imei')) {
+      if (!this.hasImei(data)) {
         console.log('No imei');
         this.sendMqttResponse(topic, 'missing_imei');
         return 'missing_imei';
@@ -57,9 +57,9 @@ export class MqttController {
 
     try {
       // check if the received message is our own response
-      if (data.hasOwnProperty('response')) return;
+      if (this.isResponse(data)) return;
 
-      if (!data.hasOwnProperty('imei')) {
+      if (!this.hasImei(data)) {
         console.log('No imei');
         this.sendMqttResponse(topic, 'missing_imei');
         return 'missing_imei';
@@ -106,9 +106,9 @@ export class MqttController {
 
     try {
       // check if the received message is our own response
-      if (data.hasOwnProperty('response')) return;
+      if (this.isResponse(data)) return;
 
-      if (!data.hasOwnProperty('imei')) {
+      if (!this.hasImei(data)) {
         console.log('No imei');
         this.sendMqttResponse(topic, 'missing_imei');
         return 'missing_imei';
@@ -142,6 +142,14 @@ export class MqttController {
       console.log(e);
       return 'Could not parse payload. Is it a valid JSON string?';
     }
+  }
+
+  isResponse(data: any): boolean {
+    return data.hasOwnProperty('response');
+  }
+
+  hasImei(data: any): boolean {
+    return data.hasOwnProperty('imei');
   }
 
   createDbPositionObj(data: any, device: Device) {
