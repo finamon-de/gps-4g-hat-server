@@ -28,7 +28,7 @@ export const BaseLayout = () => {
     useEffect(() => {
         const initSocket = () => {
             apiSocket.connect(() => {
-                apiSocket.addNewPositonCallback(newPositionCallback)
+                apiSocket.addNewPositionCallback(newPositionCallback)
             })
         }
 
