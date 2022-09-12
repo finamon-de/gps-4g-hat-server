@@ -9,8 +9,8 @@ import {
 import { AccSensorService } from 'src/sensors/acc-sensor/acc-sensor.service';
 import { DeviceService } from 'src/device/device.service';
 import { PositionService } from 'src/position/position.service';
-import { WebSocketClient } from 'src/communication/websockets/client';
 import { Device } from '../../database/mongodb/interfaces/device.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller('mqtt')
 export class MqttController {
@@ -18,7 +18,7 @@ export class MqttController {
 
   constructor(
     @Inject('MQTT_CLIENT') private mqttClient: ClientProxy,
-    private webSocket: WebSocketClient,
+    private emitter: EventEmitter2,
     private deviceService: DeviceService,
     private positionService: PositionService,
     private accSensorService: AccSensorService,
@@ -86,7 +86,7 @@ export class MqttController {
       await this.deviceService.updateDevice(device);
 
       if (addedRecord) {
-        this.webSocket.socket.emit('positions', addedRecord);
+        this.emitter.emit('ws.position', { userId: device.owner.toString(), record: addedRecord })
       }
 
       // publish response

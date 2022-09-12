@@ -6,6 +6,9 @@ import { AppService } from './app.service';
 // mongoose
 import { MongooseModule } from '@nestjs/mongoose';
 
+// event emitter
+import { EventEmitterModule } from '@nestjs/event-emitter';
+
 // custom
 import { UserModule } from '../user/user.module';
 import { UserService } from '../user/user.service';
@@ -16,8 +19,6 @@ import { DeviceModule } from '../device/device.module';
 import { MqttController } from '../communication/mqtt/mqtt.controller';
 import { PositionModule } from '../position/position.module';
 import { AccSensorModule } from '../sensors/acc-sensor/acc-sensor.module';
-import { WebSocketModule } from '../communication/websockets/websockets.module';
-import { WebSocketClient } from '../communication/websockets/client';
 import { MqttModule } from '../communication/mqtt/mqtt.module';
 
 @Module({
@@ -29,11 +30,11 @@ import { MqttModule } from '../communication/mqtt/mqtt.module';
     MongooseModule.forRoot(process.env.MONGODB_CONNECTION_URL, {
       useNewUrlParser: true,
     }),
+    EventEmitterModule.forRoot(),
     UserModule,
     DeviceModule,
     PositionModule,
     AccSensorModule,
-    WebSocketModule,
     MqttModule,
   ],
   controllers: [
@@ -42,6 +43,6 @@ import { MqttModule } from '../communication/mqtt/mqtt.module';
     DeviceController,
     MqttController,
   ],
-  providers: [AppService, UserService, DeviceService, WebSocketClient],
+  providers: [AppService, UserService, DeviceService],
 })
 export class AppModule {}

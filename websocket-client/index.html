@@ -4,9 +4,12 @@
     <script>
       const socket = io('ws://localhost:4000');
       socket.on('connect', function() {
-        console.log('Connected');
+        console.log('Connected', socket.id);
       });
       socket.on('positions', function(data) {
+        console.log(data);
+      });
+      socket.on('positions?user=s0m3Id', function(data) {
         console.log(data);
       });
       socket.on('exception', function(data) {
