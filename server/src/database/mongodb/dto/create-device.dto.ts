@@ -8,7 +8,7 @@ export class CreateDeviceDTO {
   readonly led: number;
   readonly button: number;
   readonly last_contact: string;
-  readonly owner: Schema.Types.ObjectId | Record<string, unknown>;
-  readonly positions: Schema.Types.ObjectId | Record<string, unknown>;
-  readonly acc_sensor_data: Schema.Types.ObjectId | Record<string, unknown>;
+  readonly owner: Schema.Types.ObjectId | unknown;
+  readonly positions: Schema.Types.ObjectId | unknown;
+  readonly acc_sensor_data: Schema.Types.ObjectId | unknown;
 }

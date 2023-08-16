@@ -1,32 +1,22 @@
 # Welcome
 
-This repository contains a demo application to test our GPS 4G HAT.
+This repository contains a demo application to test the GPS 4G HAT extension board.
 
 If you are searching for the library to assist you with the development using the GPS 4G HAT, head over to this repo: [LINK]()
 
 # Content
 
-This repository contains four projects.
+This repository contains the following projects:
 
-- `app`
-- `mqtt-client`
-- `server`
-- `websocket-client`
-
-The most important ones are `app` and `server`.
-
-`app` contains a web application that fetches the data from an API that is provided by the `server`. 
-
-The `app` uses the map data from Mapbox.
-To see map tiles you need to have a Mapbox API key.
-You can simply head over to their website ([here](https://mapbox.com)) and create an account, if you haven't already.
-When it is done, you copy the `default` key to get started.
+-   `mqtt-client`
+-   `server`
+-   `websocket-client`
 
 `mqtt-client` and `websocket-client` are two test applications you can use to check whether the MQTT and websocket endpoints of the API are correctly set up.
 
 # Installation
 
-For detailed installation steps check the *readme* files of the projects in the sub-folders.
+For detailed installation steps check the _readme_ files of the projects in the sub-folders.
 
 ## Summary
 

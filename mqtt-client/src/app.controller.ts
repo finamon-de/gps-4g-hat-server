@@ -20,12 +20,12 @@ export class AppController {
 
   @Get("position")
   async getPosition() {
-    const deviceStatus = {
-      imei: 866349041737515,
-      latitude: 0.0,
-      longitude: 0.0,
+    const position = {
+      imei: "866349041749536",
+      latitude: 51.2291589,
+      longitude: 6.7160651,
       utc: new Date().getTime()
     }
-    return this.client.send("gps/coordinates", deviceStatus)
+    return this.client.send(`gps/coordinates/${position.imei}`, position)
   }
 }

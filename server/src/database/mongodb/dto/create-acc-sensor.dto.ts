@@ -6,5 +6,5 @@ export class CreateAccSensorDTO {
   readonly z: number;
   readonly status: number;
   readonly utc: number;
-  readonly device: Schema.Types.ObjectId | Record<string, unknown>;
+  readonly device: Schema.Types.ObjectId | unknown;
 }
